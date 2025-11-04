@@ -2,20 +2,8 @@ const axios = require('axios');
 const fs = require('fs');
 const {
     generateEventId,
-    generateTimestamp,
-    generateTripLifecycleEvents,
-    generateDistanceMilestoneEvents,
-    generateTimeMilestoneEvents,
-    generateScheduledStopEvents
+    generateTimestamp
 } = require('./event-generators');
-
-const {
-    generateMovementEvents,
-    generateUnscheduledStopEvents,
-    generateTechnicalEvents,
-    generateConditionalEvents,
-    generateTripCancellationEvent
-} = require('./random-event-generators');
 
 // Get current date and time for folder naming
 const getCurrentDateTime = () => {
@@ -248,94 +236,9 @@ async function generateTripScenario(scenario) {
         const coordinates = await fetchRoute(scenario.startCoords, scenario.endCoords);
         console.log(`📊 Route: ${(coordinates.length * scenario.timeInterval / 3600).toFixed(1)} hours, ${coordinates.length} points`);
         
-        // Check for trip cancellation first
-        let cancellationResult = null;
-        if (scenario.cancellationChance > 0) {
-            // Force cancellation for cancelled trip scenario
-            const cancellationIndex = Math.floor(Math.random() * coordinates.length * 0.3); // Up to 30% of route
-            const coord = coordinates[cancellationIndex];
-            const cancellationTime = cancellationIndex * scenario.timeInterval;
-            
-            cancellationResult = {
-                event: {
-                    event_id: generateEventId(),
-                    event_type: "trip_cancelled",
-                    timestamp: generateTimestamp(scenario.baseTime, cancellationTime),
-                    vehicle_id: scenario.vehicleId,
-                    trip_id: scenario.tripId,
-                    cancellation_reason: ['vehicle_malfunction', 'driver_emergency', 'weather_conditions'][Math.floor(Math.random() * 3)],
-                    location: {
-                        lat: coord[1],
-                        lng: coord[0]
-                    },
-                    distance_completed_km: Math.round((cancellationIndex / coordinates.length) * 100 * 10) / 10,
-                    elapsed_time_minutes: Math.round(cancellationIndex * scenario.timeInterval / 60)
-                },
-                cancellationIndex: cancellationIndex
-            };
-        }
-        
-        let effectiveCoordinates = coordinates;
-        let isTripCancelled = false;
-        let cancellationEvents = [];
-        
-        if (cancellationResult) {
-            console.log(`🚨 Trip cancelled at ${(cancellationResult.cancellationIndex/coordinates.length*100).toFixed(1)}% of route`);
-            effectiveCoordinates = coordinates.slice(0, cancellationResult.cancellationIndex + 1);
-            isTripCancelled = true;
-            cancellationEvents = [cancellationResult.event];
-        }
-        
-        // Generate all event types
-        const locationEvents = generateLocationEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval);
-        const lifecycleEvents = isTripCancelled ? 
-            generateTripLifecycleEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, true) :
-            generateTripLifecycleEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId);
-        
-        const distanceMilestones = generateDistanceMilestoneEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval);
-        const stopEvents = generateScheduledStopEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval);
-        
-        // Generate random events with scenario-specific enhancements
-        const movementEvents = generateMovementEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval);
-        const { events: unscheduledStopEvents, stopEvents: unscheduledStops } = generateUnscheduledStopEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval);
-        
-        let technicalEvents = generateTechnicalEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, scenario.timeInterval);
-        let conditionalEvents = generateConditionalEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, scenario.timeInterval, unscheduledStops);
-        
-        // Enhance specific scenarios
-        if (scenario.enhanceTechnicalEvents) {
-            // Add more technical events for scenario 4
-            const extraTechnical = generateTechnicalEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, scenario.timeInterval);
-            technicalEvents = [...technicalEvents, ...extraTechnical];
-        }
-        
-        if (scenario.enhanceFuelEvents) {
-            // Add more fuel-related events for scenario 5
-            const extraConditional = generateConditionalEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, scenario.timeInterval, unscheduledStops);
-            conditionalEvents = [...conditionalEvents, ...extraConditional];
-        }
-        
-        const timeMilestones = generateTimeMilestoneEvents(effectiveCoordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.timeInterval, unscheduledStops);
-        
-        // Combine all events
-        let allEvents = [
-            ...lifecycleEvents,
-            ...locationEvents,
-            ...distanceMilestones,
-            ...timeMilestones,
-            ...stopEvents,
-            ...movementEvents,
-            ...unscheduledStopEvents,
-            ...technicalEvents,
-            ...conditionalEvents,
-            ...cancellationEvents
-        ];
-        
-        // Filter out events after cancellation
-        if (isTripCancelled && cancellationResult) {
-            const cancellationTime = new Date(cancellationResult.event.timestamp);
-            allEvents = allEvents.filter(event => new Date(event.timestamp) <= cancellationTime);
-        }
+        // Generate ALL events in a single unified loop (cancellation handled internally)
+        const { generateAllEventsInSingleLoop } = require('./unified-event-generator');
+        let allEvents = generateAllEventsInSingleLoop(coordinates, scenario.baseTime, scenario.vehicleId, scenario.tripId, scenario.deviceId, scenario.timeInterval, scenario.cancellationChance > 0);
         
         // Sort events by timestamp
         allEvents.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -343,14 +246,17 @@ async function generateTripScenario(scenario) {
         // Save to file
         fs.writeFileSync(scenario.filename, JSON.stringify(allEvents, null, 2));
         
-        console.log(`✅ Generated ${allEvents.length} events for ${scenario.name}`);
+        console.log(`✅ Generated ${allEvents.length} events for ${scenario.name} using unified event generator`);
         console.log(`💾 Saved to: ${scenario.filename}`);
+        
+        // Check if trip was cancelled by looking for trip_cancelled event
+        const wasCancelled = allEvents.some(event => event.event_type === 'trip_cancelled');
         
         return {
             scenario: scenario.name,
             eventCount: allEvents.length,
-            duration: `${(effectiveCoordinates.length * scenario.timeInterval / 3600).toFixed(1)} hours`,
-            cancelled: isTripCancelled
+            duration: `${(coordinates.length * scenario.timeInterval / 3600).toFixed(1)} hours`,
+            cancelled: wasCancelled
         };
         
     } catch (error) {
