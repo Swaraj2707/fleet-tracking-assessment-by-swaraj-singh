@@ -18,7 +18,7 @@ function generateAllEventsInSingleLoop(coordinates, baseTime, vehicleId, tripId,
         max_speed: 80 + Math.random() * 60, // 80-140 km/h
         speed_variation: 5 + Math.random() * 10, // ±5-15 km/h
         signal_change_probability: 0.02 + Math.random() * 0.06, // 2-8%
-        speed_limit_kmh: 0 + Math.random() * 120, // 0-120 km/h speed limit for trip
+        speed_limit_kmh: 80 + Math.random() * 120, // 80-120 km/h speed limit for trip
         speed_tolerance: 8 + Math.random() * 7, // 8-15 km/h tolerance before violation
         fuel_tank_capacity_liters: 60 + Math.random() * 80 // 60-140 liters tank capacity
     };
