@@ -1,124 +1,79 @@
-# MapUp - Fleet Tracking Dashboard Assessment
+# MapUp Fleet Tracking Dashboard
 
-## Overview
+Real-time fleet management dashboard that replays five simultaneous trips across the United States. The application consumes a 14k+ event telemetry dataset and simulates live playback so dispatchers can monitor vehicle movement, health, and alerts from a single view.
 
-The objective of this assessment is to build a **real-time fleet tracking dashboard** using realistic vehicle trip data. You'll work with comprehensive fleet tracking events to create an interactive dashboard that visualizes vehicle movements, metrics, and operational insights. This assessment tests your skills in real-time data processing, vehicle tracking, dashboard design, and fleet management visualization.
+## Features
 
-## Dataset
+- Live simulation with adjustable playback speed (1x, 5x, 10x, 30x, 60x) and seekable timeline.
+- Fleet-wide overview cards summarising active, completed, delayed, and cancelled trips plus live alert counts.
+- Interactive Leaflet map plotting the current position of each vehicle with status-aware styling.
+- Trip detail grid with progress bars, distance, speed, fuel/battery levels, and latest event context.
+- Rolling activity feed highlighting the most recent alerts and operational events.
+- Synthetic dataset generator producing 5 distinct scenarios (long haul, urban delivery, mountain cancellation, technical fault route, and regional logistics).
 
-You have two options for obtaining your assessment data:
+## Tech Stack
 
-### Option 1: Generate Your Own Unique Data (Highly Recommended)
-Generate your own unique trip data using our fleet tracking simulator. This ensures you have a completely unique dataset and demonstrates technical proficiency.
-
-**📖 [HOW_TO_GENERATE_DATA.md](./HOW_TO_GENERATE_DATA.md)** - Complete instructions for generating your assessment data
-
-### Option 2: Use Pre-generated Fallback Data
-If you encounter issues with data generation, pre-generated sample data is available in the `assessment-fallback-data/` folder.
-
-## Data Structure
-
-Your dataset contains **5 simultaneous trips** being driven by different drivers across the United States:
-
-1. **Cross-Country Long Haul** - Transcontinental freight delivery (10,000+ events)
-2. **Urban Dense Delivery** - Dense urban route with frequent updates (500+ events) 
-3. **Mountain Route Cancelled** - Trip cancelled due to weather conditions (100+ events)
-4. **Southern Technical Issues** - Route with device and technical problems (1,000+ events)
-5. **Regional Logistics** - Regional route with fuel management events (2,000+ events)
-
-Each trip progresses independently with its own timeline, events, and challenges. Your dashboard should handle monitoring all trips simultaneously while providing both individual trip details and fleet-wide insights.
-
-**📖 [FLEET_TRACKING_EVENT_TYPES.md](./FLEET_TRACKING_EVENT_TYPES.md)** - Complete reference for all 27 event types in your dataset
-
-## Tasks
-
-### Dashboard Creation:
-
-Build a comprehensive fleet tracking dashboard that displays:
-
-- **Individual Trip Data**: Show detailed metrics and progress for each of the 5 concurrent trips
-- **Collective Fleet Metrics**: Display overall fleet insights (e.g., how many trips completed 50%, 80%, etc.)
-- **Real-time Simulation**: Use event timestamps to simulate live fleet tracking
-
-You have complete creative freedom in choosing what metrics to display, how to visualize the data, and what insights to highlight. Focus on creating a dashboard that would be valuable for fleet managers monitoring multiple simultaneous trips.
-
-### Real-time Data Simulation:
-
-Since the trip data contains timestamps, you'll need to simulate real-time behavior. Here are some implementation hints (feel free to use any other approach you prefer):
-
-- **Local Interval Function**: Use `setInterval()` or similar to process events based on their timestamps
-- **Streaming API**: Create a mock API endpoint that serves events in real-time sequence
-- **Playback Controls**: Allow users to control the simulation speed (1x, 5x, 10x speed)
-- **Time-based Processing**: Filter and display events as if they're happening "now" based on simulation time
-
-These are just suggestions - you're welcome to implement real-time simulation using any method that works best for your chosen tech stack and demonstrates your skills effectively.
-
-### Technical Requirements:
-
-- **Event Stream Processing**: Process events chronologically to simulate real-time data
-- **State Management**: Track vehicle status, trip progress, and alert states
-- **Performance**: Efficiently handle datasets with 10,000+ events
-- **Responsive Design**: Ensure dashboard works across different screen sizes
-- **User Experience**: Create intuitive navigation and information hierarchy
-
-### Deployment:
-
-- Deploy your fleet tracking dashboard to a hosting platform of your choice
-- Make sure the dashboard is publicly accessible
-- Ensure it can load and process the generated trip data files
-
-## Evaluation Criteria
-
-Your submission will be evaluated based on:
-
-- **Real-time Processing**: Effectiveness in simulating and consuming real-time fleet tracking events
-- **Dashboard Design**: Clarity, aesthetics, and usability of the interface
-- **Technical Implementation**: Code quality, performance, and architecture decisions
-- **Data Insights**: Ability to present meaningful trip and fleet insights
-- **User Experience**: Intuitive navigation and information presentation
-
-
-## Submission Guidelines
-
-**Repository Setup (choose one approach):**
-
-**Option 1: Clean Fork**
-- Fork this repository and remove all generator code (`data-generator/`, `HOW_TO_GENERATE_DATA.md`, etc.)
-- Keep only your generated trip data files (if required) and your dashboard implementation
-- Update the README with your dashboard description and live URL
-
-**Option 2: New Repository** 
-- Create a new private repository for your dashboard implementation
-- Copy your generated trip data files to your new repository
-- Create your own README describing your dashboard and include the live URL
-
-**For both approaches:**
-- Complete your fleet tracking dashboard implementation
-- Deploy the dashboard to a hosting platform
-- **Repository Access:** Keep your repository private to avoid visibility by other candidates. Add the following email addresses as collaborators:
-  - vedantp@mapup.ai
-  - ajayap@mapup.ai 
-  - asijitp@mapup.ai 
-  - atharvd@mapup.ai
-  - karkuvelpandip@mapup.ai
-
-- Finally, please fill out the google form that you received via email to submit the assessment for review
+- React 18 + TypeScript + Vite.
+- Zustand for simulation state management.
+- Leaflet via `react-leaflet` for mapping.
+- `date-fns` for human-friendly time formatting.
 
 ## Getting Started
 
-1. **Generate Your Data**: Follow [HOW_TO_GENERATE_DATA.md](./HOW_TO_GENERATE_DATA.md) to create your unique dataset
-2. **Study Event Types**: Review [FLEET_TRACKING_EVENT_TYPES.md](./FLEET_TRACKING_EVENT_TYPES.md) to understand the data structure
-3. **Plan Your Dashboard**: Design your approach for real-time visualization and event processing
-4. **Build & Deploy**: Implement your solution and deploy to a hosting platform
+```bash
+npm install
+npm run dev
+```
 
----
+The development server runs on `http://localhost:5173`. The dashboard auto-plays the simulation once the dataset loads. Use the controls in the header to pause, change speed, or scrub through the trip timeline.
 
-**Ready to build your fleet tracking dashboard? Start by generating your unique assessment data!**
+### Building for Production
 
-📖 **Next Step**: [HOW_TO_GENERATE_DATA.md](./HOW_TO_GENERATE_DATA.md)
+```bash
+npm run build
+npm run preview
+```
 
-### AI and LLM Usage
+`npm run build` compiles the app into the `dist/` directory. Serve that folder with any static host (Vercel, Netlify, Cloudflare Pages, S3 + CloudFront, etc.). The app expects the dataset at `/data/fleet-events.json`; ensure that file is published alongside the build output.
 
-We encourage the use of AI and LLM tools for this assessment! However, you must understand what you're building and be able to explain your implementation decisions.
+## Data Generation
 
----
+The repository includes a custom simulator that emits a unique dataset honouring the MapUp assessment specification. Regenerate data at any time:
+
+```bash
+npm run generate:data
+```
+
+The script writes `public/data/fleet-events.json`. Each trip plan is seeded for deterministic structure but incorporates random noise so every run stays realistic. The generated file contains:
+
+- `trips`: metadata for the five concurrent trips (names, drivers, schedule, distance, planned stops).
+- `events`: chronologically ordered telemetry with 27+ event types, alert severities, fuel/battery updates, and geographic coordinates.
+- `metadata`: generator provenance for auditability.
+
+## Architecture Notes
+
+- `src/store/simulationStore.ts` handles loading, chronological playback, alert tracking, and derived fleet metrics. Rewinding is supported via a reset + fast-forward strategy to keep the state consistent.
+- `src/hooks/useSimulationClock.ts` advances the simulated clock on a 250 ms tick, scaled by the selected speed multiplier.
+- UI is divided into dedicated panels (`FleetMap`, `FleetSummary`, `TripsGrid`, `ActivityFeed`, `SimulationControls`) for clarity and responsiveness.
+- Styling (`src/style.css`) emphasises concise visual hierarchy and adapts down to tablet widths without losing insight density.
+
+## Deployment Checklist
+
+1. Run `npm run build` and verify locally with `npm run preview`.
+2. Upload the contents of `dist/` and `public/data/fleet-events.json` to your hosting provider.
+3. Set the site to serve from the project root so `/data/fleet-events.json` resolves correctly.
+4. Smoke-test the live URL: ensure the map renders, simulation auto-starts, controls respond, and the activity feed streams events.
+5. Share the private repository with the MapUp reviewers (`vedantp@mapup.ai`, `ajayap@mapup.ai`, `asijitp@mapup.ai`, `atharvd@mapup.ai`, `karkuvelpandip@mapup.ai`) and submit the final link via the provided Google Form.
+
+## Testing Ideas
+
+- Validate playback controls by scrubbing to early, mid, and late timestamps and confirming metrics update coherently.
+- Pause and resume to ensure the simulation clock holds position and restarts without jumps.
+- Inspect the console/network tab to confirm `/data/fleet-events.json` loads successfully in production.
+- Regenerate the dataset to verify the app adapts to new telemetry without code changes.
+
+## License
+
+Private assessment project for MapUp — do not distribute without permission.
+
+
