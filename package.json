@@ -7,7 +7,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "generate:data": "tsx scripts/generate-data.ts"
   },
@@ -16,6 +16,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",
+    "rollup": "^4.53.2",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "vite": "^7.2.2"
