@@ -72,8 +72,9 @@ The script writes `public/data/fleet-events.json`. Each trip plan is seeded for 
 - Inspect the console/network tab to confirm `/data/fleet-events.json` loads successfully in production.
 - Regenerate the dataset to verify the app adapts to new telemetry without code changes.
 
-## License
+# 🚚 Fleet Tracking Dashboard
 
-Private assessment project for MapUp — do not distribute without permission.
+**Live Demo:** [https://fleet-tracking-assessment-by-swaraj.vercel.app/](https://fleet-tracking-assessment-by-swaraj.vercel.app/)
+
 
 
