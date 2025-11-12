@@ -57,13 +57,6 @@ The script writes `public/data/fleet-events.json`. Each trip plan is seeded for 
 - UI is divided into dedicated panels (`FleetMap`, `FleetSummary`, `TripsGrid`, `ActivityFeed`, `SimulationControls`) for clarity and responsiveness.
 - Styling (`src/style.css`) emphasises concise visual hierarchy and adapts down to tablet widths without losing insight density.
 
-## Deployment Checklist
-
-1. Run `npm run build` and verify locally with `npm run preview`.
-2. Upload the contents of `dist/` and `public/data/fleet-events.json` to your hosting provider.
-3. Set the site to serve from the project root so `/data/fleet-events.json` resolves correctly.
-4. Smoke-test the live URL: ensure the map renders, simulation auto-starts, controls respond, and the activity feed streams events.
-5. Share the private repository with the MapUp reviewers (`vedantp@mapup.ai`, `ajayap@mapup.ai`, `asijitp@mapup.ai`, `atharvd@mapup.ai`, `karkuvelpandip@mapup.ai`) and submit the final link via the provided Google Form.
 
 ## Testing Ideas
 
